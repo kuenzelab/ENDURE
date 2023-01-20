@@ -1,4 +1,4 @@
-# PRODEA
+# ENDURE
 
 Mutation Energy Analysis Toolset
 A set of tools to analyze interaction energy changes when designing a variant protein
