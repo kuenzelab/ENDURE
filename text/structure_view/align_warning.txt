@@ -1,0 +1,4 @@
+This web interface is incapable of superimposing 3D structures. If you
+would like for your visualizations to be superimposed, you will need to
+use an external tool to modify the PDB coordinates. Then you can upload the
+new files and they will display correctly.

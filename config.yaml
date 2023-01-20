@@ -1,0 +1,17 @@
+credentials:
+  usernames:
+    fengel:
+      email: felipeengelberger@gmail.com
+      name: Felipe Engelberger
+      password: $2b$12$AV.K4K18pjNyAaDXzHnOO.J4MY0CL.uG1pXLs.OPxvFaJmsWiEEse # To be replaced with hashed password
+    gkuenze:
+      email: georgkuenze@gmail.com
+      name: Georg Kuenze
+      password: $2b$12$6a/3LzbbcTRNS/TriqELPeh33.0uEG9F/OGFvbTgEGCG5hmuXBPCS # To be replaced with hashed password
+cookie:
+  expiry_days: 30
+  key: some_signature_key
+  name: some_cookie_name
+preauthorized:
+  emails:
+  - melsby@gmail.com

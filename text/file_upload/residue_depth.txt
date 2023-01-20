@@ -1,0 +1,10 @@
+Residue depth is calculated using the Biopython library. Residue depth is
+defined as the average distance (in angstroms) of the atoms in a residue from
+the solvent accessible surface. While the tertiary and secondary structure of
+a variant protein may remain the same, the side chain conformation of a mutated
+residue could shift, causing a change in its calculated depth.
+
+These calculations are long enough to make the GUI thread hang, so they
+are executed in a separate thread. Because of this, there may be a slight delay between
+when the status says "Residue Depth Calculated" and when the calculations
+are actually finished.

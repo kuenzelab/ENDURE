@@ -1,0 +1,10 @@
+{
+  "data": [
+    ["A", "Residues that were previously interacting in the wild-type now have a different interaction energy in the variant, even though neither of them were mutated"],
+    ["B", "Residues that were previously interacting had one member of the pair replaced, resulting in a different interaction energy in the variant"],
+    ["C", "Residues that were previously interacting in the wild-type no longer interact in the variant, even though neither of them were mutated"],
+    ["D", "Residues that were previously interacting in the wild-type no longer interact in the variant because one member of the pair was mutated"],
+    ["E", "Residues that were previously not interacting in the wild-type now interact in the variant, even though neither of them were mutated"],
+    ["F", "Residues that were previously not interacting in the wild-type now interact in the variant because one member of the pair was mutated"]
+  ]
+}

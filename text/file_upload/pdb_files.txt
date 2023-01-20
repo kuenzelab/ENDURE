@@ -1,0 +1,2 @@
+PDB files must be cleaned in order to be parsed correctly. Additionally, they
+must also be renumbered so that the first residue in the file is at position 1.

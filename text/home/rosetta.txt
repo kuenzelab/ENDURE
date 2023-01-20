@@ -1,0 +1,11 @@
+This application makes use of The Rosetta Software, a set of algorithms and
+tools for computational modeling and analysis of protein structures. Due to
+licensing restrictions, this software cannot be provided in an open source
+repository. Therefore, users will need to provide the path to the Rosetta
+executable on their computer.
+
+For example, a path to the executable would look something like this:
+```/home/iwe22/rosetta3.13/main/source/bin/residue_energy_breakdown.static.linuxgccrelease```
+
+If you are accessing this application through a webserver, the owner of the
+webserver has already taken care of this requirement.

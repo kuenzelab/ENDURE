@@ -1,0 +1,6 @@
+This app contains a set of interactive tools to help determine key interactions
+within a protein structure that affect its stability and/or activity.
+This is designed to compare a single designed structure against its wild-type,
+not an array of designed structures. Furthermore, the analysis protocols do
+not support insertions and deletions. The variant structure should have the
+same length as the wild-type in order for the analysis to be accurate.
