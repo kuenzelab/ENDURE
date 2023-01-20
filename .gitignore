@@ -1,4 +1,4 @@
 # Ignore all the files in the path .\lib\rosetta_linux
 .\lib\rosetta_linux\*
 lib/rosetta_linux/*
-lib/__pycache__/*
+lib/__pycache__/* 
