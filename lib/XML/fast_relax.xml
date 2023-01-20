@@ -1,0 +1,28 @@
+<ROSETTASCRIPTS>
+
+    <SCOREFXNS>
+    </SCOREFXNS>
+
+    <TASKOPERATIONS>
+    <InitializeFromCommandline name="ifcl" />
+    </TASKOPERATIONS>
+
+    <MOVERS>
+    <FastRelax name="relax" scorefxn="REF2015" task_operations="ifcl" repeats="1"/>
+    production should be 5 repeats
+    FastRelax name="relax" scorefxn="REF2015" task_operations="ifcl" repeats="5"
+    </MOVERS>
+
+    <FILTERS>
+    </FILTERS>
+
+    <APPLY_TO_POSE>
+    </APPLY_TO_POSE>
+
+    <PROTOCOLS>
+    <Add mover="relax" />
+    </PROTOCOLS>
+
+    <OUTPUT scorefxn="REF2015" />
+
+</ROSETTASCRIPTS>

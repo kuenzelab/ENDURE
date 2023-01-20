@@ -1,0 +1,2 @@
+Given the wild-type and variant structures, the mutations can be determined.
+The position of the mutations are needed for many components of the analysis.

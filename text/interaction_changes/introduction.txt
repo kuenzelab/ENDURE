@@ -1,0 +1,3 @@
+When mutations are introduced into the design, changes in the pairwise interactions occur.
+These changes can be analyzed by comparing the output of the rosetta energy breakdown protocol
+for the wild-type and the mutant.

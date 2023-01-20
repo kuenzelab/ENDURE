@@ -1,0 +1,6 @@
+Energy breakdown files are created by the Rosetta protocol ```residue_energy_breakdown```
+
+Rosetta is run in the background to prevent the GUI thread from hanging.
+Because of this, there may be a slight delay between
+when the status says "Energy Breakdown Calculated" and when the calculations
+are actually finished.
