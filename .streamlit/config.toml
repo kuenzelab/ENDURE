@@ -1,0 +1,10 @@
+[deprecation]
+showPyplotGlobalUse = false
+
+[theme]
+primaryColor="#D9ACF5"
+backgroundColor="#FFFFFF"
+secondaryBackgroundColor="#F7EFE5"
+textColor="#262730"
+# Define a modern font 
+font="sans serif"

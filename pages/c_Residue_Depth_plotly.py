@@ -14,22 +14,150 @@ from st_aggrid import (
     AgGrid, DataReturnMode, GridUpdateMode, GridOptionsBuilder
 )
 from lib.visualization import WebViewer
-from stmol import showmol, render_pdb_resn, render_pdb
+from stmol import makeobj, showmol, render_pdb_resi, add_model, add_hover
 import py3Dmol
 
-## If user or username not in session state then set to None
-if "name" not in st.session_state:
-    st.session_state["name"] = None
-if "username" not in st.session_state:
-    st.session_state["username"] = None
 
 
 import streamlit as st
-from utility import load_text
 from lib.visualization import WebViewer
+from utility import load_text, add_logo
+
+add_logo("images/draft_logo_200.png")
+
+## TODO Move this to a stmol_mod module
+
+
+def add_hover_res(obj,backgroundColor='white',fontColor='black'):
+    """
+    Adds a hover function to the Py3DMOL object to show the atom name when the mouse hovers over an atom.
+    Example:
+        obj = render_pdb()
+        add_hover(obj)
+        showmol(obj)
+    Parameters
+    ----------
+    obj: Py3DMOL object
+        Already existing Py3DMOL object, which can be created using the makeobj function.
+    backgroundColor: String, default 'white'
+        Is the background color of the hover text
+    fontColor: String, default 'black'
+        Is the color of the text
+    Returns
+    -------
+    None.
+    """
+
+    js_script = """function(atom,viewer) {
+                   if(!atom.label) {
+                    atom.label = viewer.addLabel('Res # '+atom.resi,{position: atom, backgroundColor:"%s" , fontColor:"%s"});
+                }
+              }"""%(backgroundColor,fontColor)
+    obj.setHoverable({},True,js_script,
+               """function(atom,viewer) {
+                   if(atom.label) {
+                    viewer.removeLabel(atom.label);
+                    delete atom.label;
+                   }
+                }"""
+               )
+
+
+def add_model_sidechain(obj,molformat='pdb',model_style='sphere'):
+    """
+    Adds a model to an existing Py3DMOL object.
+    
+    Parameters
+    ----------
+    obj: Py3DMOL object
+        Already existing Py3DMOL object.
+    xyz: String
+        Is the model to be added.
+    molformat: String, default 'mol'    
+        Is the format of the added model
+    model_style: String, default 'stick'
+        Is the style of the added model. Can be 'stick', 'sphere', 'cross', 'surface', 'ribbon', 'cartoon'
+    
+    Returns
+    -------
+    None.
+    """
+    #obj.addModel(xyz,molformat)
+    obj.setStyle({'model':-1},{model_style:{}})
+    obj.setStyle({'model':0},{'cartoon': {'color':'white'}},{model_style:'sphere'})
+    obj.setStyle({'model':1},{'cartoon': {'color':'gray'}},{model_style:{}})
+    obj.addStyle({'within':{'distance': 7, 'sel':{'resi':209}}},{'stick':{'colorscheme':'grayCarbon'}})
+    obj.addStyle(
+                    {
+                        'model':0,'resi':209},
+                    {
+                        'stick':
+                            {'colorscheme':'purpleCarbon'}
+                    }
+                )
+    obj.addStyle(
+                    {
+                        'model':1,
+                        'resi':209
+                    },
+                    {
+                        'stick':
+                        {
+                        'colorscheme':'greenCarbon'
+                        }
+                    }
+                )
+    obj.zoomTo(
+                {
+                    'model':0,
+                    'resi':209
+                }
+            )
+    obj.setBackgroundColor('white')
+    #Set a visualization style for chain B
+    obj.setStyle({'chain':'B'},{'cartoon': {'color':'purple'}})
+    #Add a visualization style for residue 158 in chain B
+    obj.addStyle({'chain':'B','resi':158},{'stick':{'colorscheme':'grayCarbon'}})
+
+def color_cartoon(obj, file_name: str, resi: int, color: str) -> None:
+        """
+        Set a particular location of the cartoon to a specific color
+        :param file_name:
+            A portion of the file name, such as "wild" or "variant", if the
+            full name is "pdb_wild_clean" or "pdb_variant_clean"
+        :param resi:
+            The residue location to be colored
+        :param color:
+            The desired color
+        :return:
+            None
+        """
+        obj.__set_style(
+            {
+                'model': 0,
+                'resi': resi
+            },
+            {
+                'cartoon': {
+                    'color': color
+                }
+            }
+        )
 
 STATE: dict
 
+
+def check_files() -> bool:
+    """
+    Check that the required files exist in session state
+    :return:
+    """
+    constraints = [
+        'energy_wild' in st.session_state['File Upload'].keys(),
+        'energy_variant' in st.session_state['File Upload'].keys(),
+        'mutations' in st.session_state['File Upload'].keys()
+    ]
+    return all(constraints)
 
 def parse_resi(user_input: str) -> None:
     """
@@ -42,27 +170,6 @@ def parse_resi(user_input: str) -> None:
     except ValueError:
         st.error('Invalid Residue String')
 
-
-def create_viewer() -> None:
-    """
-    Create the PDB structure viewer
-    :return:
-    """
-    from stmol import showmol
-    import py3Dmol
-
-
-    viewer = py3Dmol.view()
-    for i in ['wild', 'variant']:
-        viewer.add_model(i)
-        viewer.show_cartoon(i, STATE['cartoon'])
-        viewer.show_sc(
-            i, STATE['resi'], STATE[f'{i}_color'], STATE['cartoon']
-        )
-    viewer.set_background(STATE['background'])
-    viewer.center('wild', STATE['resi'])
-    viewer.show()
-    showmol(viewer, height = 500,width=800)
 
 
 def color_select() -> None:
@@ -94,32 +201,6 @@ def color_select() -> None:
     color = st.color_picker('Variant Color', STATE['variant_color'])
     STATE['variant_color'] = color
 
-
-def tools() -> None:
-    """
-    Create toolbar for selecting residues
-    :return:
-    """
-    # Residue Selection
-    if 'resi' not in STATE.keys():
-        STATE['resi'] = [1, 2]
-    resi = st.text_input(
-        label='Show Residue Side Chains:',
-        value=','.join([str(x) for x in STATE['resi']])
-    )
-    parse_resi(resi)
-
-
-def check_files() -> bool:
-    """
-    Check that necessary files exist in session state
-    :return:
-    """
-    constraints = [
-        'pdb_wild_clean' in st.session_state['File Upload'].keys(),
-        'pdb_variant_clean' in st.session_state['File Upload'].keys()
-    ]
-    return all(constraints)
 
 
 
@@ -288,8 +369,12 @@ def load_data_variant() -> pd.DataFrame:
     # Round the column x and y to two decimals
     df["x"] = df["x"].round(2)
     df["y"] = df["y"].round(2)
-    # Remove the elements that are Conserved in the column label
+    # Remove the elements that are Conserved or Worse Energy in the column label
     df = df[df["label"] != "Conserved"]
+    # Create a new df where the rows where label is Worse Energy are removed
+    #df = df[df["label"] != "Worse Energy"]
+
+    
     return df
 
 @st.experimental_singleton
@@ -356,9 +441,11 @@ def query_data(df_wild: pd.DataFrame,
     return df_wild, df_variant
 
 
-def build_depth_variant_figure(df: pd.DataFrame) -> go.Figure:
+def build_depth_variant_figure(df: pd.DataFrame,
+                            height : int,
+                            width : int) -> go.Figure:
     # Create a streamlit slider from 1 to 20 with a step of 1
-    slider_variant = st.slider("", 5, 20, 9, key="slider_variant")
+    slider_variant = st.slider("", 5, 20, 8, key="slider_variant")
     fig = px.scatter(
         df,
         "x",
@@ -376,8 +463,7 @@ def build_depth_variant_figure(df: pd.DataFrame) -> go.Figure:
             "y",
             "selected"
         ],
-        height=800,
-        width=1100,
+
     )
     fig.update_layout(paper_bgcolor="#FFFFFF", plot_bgcolor="#FFFFFF")
     fig.update_xaxes(gridwidth=0.1, gridcolor="#EDEDED")
@@ -389,13 +475,15 @@ def build_depth_variant_figure(df: pd.DataFrame) -> go.Figure:
     # Net Interaction Energy in REU
     fig.update_yaxes(title_text="Net Interaction Energy [REU]")
     # Make the figure longer
-    fig.update_layout(height=500, width=600)
+    fig.update_layout(height=height, width=width)
     return fig
 
 
-def build_depth_wild_figure(df: pd.DataFrame) -> go.Figure:
+def build_depth_wild_figure(df: pd.DataFrame,
+                            height : int,
+                            width : int) -> go.Figure:
     # Create a streamlit slider from 1 to 20 with a step of 1
-    slider_wild = st.slider("Select the size of the dots in the plot", 5, 20, 9, key="slider_wild")
+    slider_wild = st.slider("Select the size of the dots in the plot", 5, 20, 8, key="slider_wild")
     fig = px.scatter(
         df,
         "x",
@@ -411,8 +499,7 @@ def build_depth_wild_figure(df: pd.DataFrame) -> go.Figure:
             "y",
             "selected"
         ],
-        height=800,
-        width=1100,
+
     )
     fig.update_layout(paper_bgcolor="#FFFFFF", plot_bgcolor="#FFFFFF")
     fig.update_xaxes(gridwidth=0.1, gridcolor="#EDEDED")
@@ -424,7 +511,7 @@ def build_depth_wild_figure(df: pd.DataFrame) -> go.Figure:
     # Net Interaction Energy in REU
     fig.update_yaxes(title_text="Net Interaction Energy [REU]")
     # Make the figure longer
-    fig.update_layout(height=500, width=600)
+    fig.update_layout(height=height, width=width)
     return fig
 
 
@@ -451,8 +538,10 @@ def render_preview_ui(df_variant: pd.DataFrame,
         )
 
 
-def render_plotly_ui(transformed_df_variant: pd.DataFrame,
-                        transformed_df_wild: pd.DataFrame) -> Dict:
+def render_plotly_ui(transformed_df_wild: pd.DataFrame,
+                        transformed_df_variant: pd.DataFrame,
+                            height : int,
+                            width : int) -> Dict:
     """Renders all Plotly figures.
     Returns a Dict of filter to set of row identifiers to keep, built from the
     click/select events from Plotly figures.
@@ -464,7 +553,7 @@ def render_plotly_ui(transformed_df_variant: pd.DataFrame,
         # Write a subheader
         st.subheader("Depth Wild")
         depth_wild_selected = plotly_events(
-            build_depth_wild_figure(transformed_df_variant),
+            build_depth_wild_figure(transformed_df_wild, height, width),
             select_event=True,
             key=f"depth_wild_{st.session_state.counter}",
         )
@@ -473,8 +562,10 @@ def render_plotly_ui(transformed_df_variant: pd.DataFrame,
     with c2:
         # Write a subheader
         st.subheader("Depth Variant")
+        
+        
         depth_variant_selected = plotly_events(
-                build_depth_variant_figure(transformed_df_wild),
+                build_depth_variant_figure(transformed_df_variant, height, width),
                 select_event=True,
                 key=f"depth_variant_{st.session_state.counter}",
             )
@@ -512,40 +603,101 @@ def update_state(current_query: Dict[str, Set]):
 
 
 def main():
-    # TODO Add a radio filter to the data by Mutated or Conserved and Better and Worse Energy for the variant
-    """
-    st.subheader("Wild Type Filter")
-        # Create a selectbox with a label
-        wild_type_filter = st.radio(
-            # Use Conserved and Mutated as label
-            "Wild Type",
-            # List of options
-            ("Mutated", "Conserved"),
-            key = "wild_type_filter"
-        )
-        df_wild = load_data_wild(wild_type_filter)
-        st.subheader("Variant Filter")
-        # Create a selectbox with a label
-        variant_filter = st.radio(
-            # Use Conserved, Better Energy and Worse Energy as label
-            "Variant",
-            # List of options
-            ( "Better Energy", "Conserved", "Worse Energy"),
-            key = "variant_filter"
-        )
-        df_variant = load_data_variant(variant_filter)
-    """
+    # TODO Add a radio filter to the data by Mutated or Conserved and Better and Worse Energy for the varian
+    
+     # Create  a expandable text in the sidebar that explains the purpose of the app 
+    with st.sidebar:
+        st.expander("About", expanded=False).markdown("""The residue depth page provides a visual representation of the change in residue depth that occurs when mutations are introduced. Residue depth is calculated using the Biopython library and is defined as the average distance (in angstroms) of the atoms in a residue from the solvent accessible surface. By analyzing the changes in residue depth, you can gain insights into how mutations affect the structural stability of your designs.
+    """)
+    # Create a markdown text in the sidebar that indicate the molecule viewer style options
+    st.sidebar.markdown("""
+    ### Molecule Viewer Selection Options
+    """)
+    hl_resi_list = st.sidebar.multiselect(label="Extra residues to highlight in the structure viewer",
+                                            options=list(range(1,1000)),
+                                            # Write a detailed help message, step by step
+                                            help="Select the residues to highlight in the structure viewer (e.g. 1, 2, 3), the residues will be highlighted in the structure viewer in addition to the residues selected in the table")
+    st.sidebar.markdown("""
+    ### Molecule Viewer Style Options
+    """)
+    hl_model = st.sidebar.text_input(label="Highlight Chain",
+                                        value="A",
+                                        # Write a detailed help message, step by step
+                                        help="Enter the chain ID of the variant to highlight residues in the structure viewer (e.g. A), for the moment, only one chain can be highlighted at a time")
+
+    label_resi = st.sidebar.checkbox(label="Label Residues", 
+                                    value=True,
+                                    # Write a detailed help message, step by step
+                                    help="Do you want to label the residues in the structure viewer?, if yes, select the checkbox")
+    
+    surf_transp = st.sidebar.slider("Surface Transparency", 
+                                        min_value=0.0, 
+                                        max_value=1.0, 
+                                        value=0.0,
+                                        # Write a detailed help message, step by step
+                                        help="Set the transparency of the surface in the structure viewer (0.0 is transparent, 1.0 is opaque)")
+
+    # Top n energy interactions to show
+    top_n = st.sidebar.slider("Top n interacting residue pairs", 
+                                min_value=1, 
+                                max_value=10, 
+                                value=3,
+                                # Write a detailed help message, step by step
+                                help="Set the number of top interacting residue pairs to show in the structure viewer, these are the residue pairs with the lowest energy change meaning they are the most contributing to the energy change.")
+
+    # Create a checkbox called zone selection and set it to False
+    zone_selection = st.sidebar.checkbox(label="Zone Selection", 
+                                        value=False,
+                                        # Write a detailed help message, step by step
+                                        help="Do you want to select a zone to view, if yes, select the checkbox and use the slider to select the zone in angstroms (1-10)")
+
+    # If zone selection is True, show the zone slider
+    if zone_selection:
+        zone = st.sidebar.slider("Zone", min_value=1, max_value=10, value=7)
+    hl_color = st.sidebar.text_input(label="Highlight Color",
+                                    value="yellow",
+                                    # Write a detailed help message, step by step
+                                    help="Enter the color of the residue stick representation in the structure viewer (e.g. yellow) ")
+
+    bb_color = st.sidebar.text_input(label="Backbone Color",
+                                    value="lightgrey",
+                                    # Write a detailed help message, step by step
+                                    help="Enter the color of the backbone riboon representation in the structure viewer (e.g. lightgrey)")
+    lig_color = st.sidebar.text_input(label="Ligand Color",
+                                        value="white",
+                                        # Write a detailed help message, step by step
+                                        help="Enter the color of the ligand representation in the structure viewer (e.g. white), if no ligand is present, this will be ignored")
+    # Create a sidebar slider to select the width of the structure viewer
+    width = st.sidebar.slider("Width", min_value=300, max_value=1000, value=590)
+
+    # Create a sidebar slider to select the height of the structure viewer
+    height = st.sidebar.slider("Height", min_value=300, max_value=1000, value=590)
+
+    cartoon_radius = 0.2
+    stick_radius = 0.2
+
+
     df_variant = load_data_variant()
+    # Create a list with the positions that have Worse Energy
+    worse_energy_list = df_variant[df_variant.label == "Worse Energy"].position.to_list()
+    
+    
     df_wild = load_data_wild()
+    # Drop the rows that have Worse Energy in the df_wild
+    df_wild = df_wild[~df_wild.position.isin(worse_energy_list)]
+    # Drop the rows that have Worse Energy in the df_variant
+    df_variant = df_variant[~df_variant.position.isin(worse_energy_list)]
+
     transformed_df_wild, transformed_df_variant = query_data(df_wild,df_variant)
     st.button("Reset filters", on_click=reset_state_callback)
     # Run the create_data function to create the data
     source_wild, entries_wild = create_data("wild")
     source_variant, entries_variant = create_data("variant")
     st.title("Energy Breakdown by Residue Depth")
+
     #render_preview_ui(transformed_df_wild, transformed_df_variant)
 
-    current_query = render_plotly_ui(transformed_df_wild,transformed_df_variant)
+    current_query = render_plotly_ui(transformed_df_wild,transformed_df_variant,height,width)
     update_state(current_query)
 
     # Write a subheader
@@ -553,6 +705,9 @@ def main():
     # Write a text
     st.write("Click on a residue in the scatter plot to see an energy breakdown of all the pairwise interactions of that residue")
     c1, c2 = st.columns(2)
+    wild_structure = st.session_state['File Upload'][f'pdb_wild_clean'].getvalue()
+    variant_structure = st.session_state['File Upload'][f'pdb_variant_clean'].getvalue()
+    
     if len(transformed_df_wild[transformed_df_wild["selected"]]["position"]) > 1 and len(transformed_df_variant[transformed_df_variant["selected"]]["position"]) > 1:
         st.write("Please select only one residue in the scatter plot")
     else:
@@ -561,27 +716,137 @@ def main():
                     position_wild = int(transformed_df_wild[transformed_df_wild["selected"]]["position"].astype(int))
                     # Create a sum of the total energy for the wild type selected residue save it as a variable
                     total_energy_wild = entries_wild[position_wild]["Total energy[REU]"].sum()
+                    wild_df = entries_wild[position_wild]
+                    wild_df['Residue pair'] = wild_df.apply(lambda x: x['Residue 2'] if x['Residue 1'] == position_wild else x['Residue 1'], axis=1)
+                    # Reset the index
+                    wild_df = wild_df.reset_index(drop=True)
+                    
+                    # Convert to int
+                    wild_df['Residue pair'] = wild_df['Residue pair'].astype(int)
+                    # Drop the Residue 1 and Residue 2 columns
+                    wild_df = wild_df.drop(['Residue 1', 'Residue 2'], axis=1)
+                    # Reorder the columns
+                    wild_df = wild_df[['Residue pair', 'Total energy[REU]']]
                     st.metric(f"Residue {position_wild} Sum Total Energy [REU]", f"{total_energy_wild:.2f}")
-                    st.dataframe(entries_wild[position_wild].style.background_gradient(axis=0, subset='Total energy[REU]', cmap='coolwarm_r'), use_container_width=True)
-                
+                    st.dataframe(wild_df.style.background_gradient(axis=0, subset='Total energy[REU]', cmap='coolwarm_r'), use_container_width=True)
+                    # Create a list of the top n energy interactions Residue pairs
+                    # Head returns the top n rows, extract the Residue pair column and convert to a list
+                    top_n_wild = wild_df.head(top_n)["Residue pair"].tolist()
+
+                    view_wt = makeobj(wild_structure,molformat='pdb',style='stick',background='white')
+
+                    view_wt.setStyle({"cartoon": {"style": "oval","color": bb_color,"thickness": cartoon_radius}})
+
+                    view_wt.addSurface(py3Dmol.VDW, {"opacity": surf_transp},
+                                                        {"hetflag": False})
+
+                    view_wt.addStyle({"elem": "C", "hetflag": True},
+                                    {"stick": {"color": lig_color, "radius": stick_radius}})
+
+                    view_wt.addStyle({"hetflag": True},
+                                        {"stick": {"radius": stick_radius}})
+                    # Append the position_variant to the h1_resi_list
+                    hl_resi_list.append(position_wild)
+                    # Add the top n energy interactions to the h1_resi_list
+                    hl_resi_list.append(top_n_wild)
+                    for hl_resi in hl_resi_list:
+                        view_wt.addStyle({"chain": hl_model, "resi": hl_resi, "elem": "C"},
+                                        {"stick": {"color": hl_color, "radius": stick_radius}})
+                        
+
+                        view_wt.addStyle({"chain": hl_model, "resi": hl_resi},
+                                            {"stick": {"radius": stick_radius}})
+
+                    if label_resi:
+                        for hl_resi in hl_resi_list:
+                            view_wt.addResLabels({"chain": hl_model,"resi": hl_resi},
+                            {"backgroundColor": "lightgray","fontColor": "black","backgroundOpacity": 0.5})
+                    view_wt.zoomTo(
+                        {
+                            'model':0,
+                            'resi': position_wild
+                        }
+                    )
+                    # If zone selection is True, add a style to the view_wt
+                    if zone_selection:
+                        view_wt.addStyle({'within':{'distance': zone, 'sel':{'resi':position_wild}}},{'stick':{'colorscheme':'grayCarbon'}})
+                    # Add hover
+                    add_hover_res(view_wt)
+                    showmol(view_wt,height=height+20, width=width)                
 
                 with c2:
                     position_variant = int(transformed_df_variant[transformed_df_variant["selected"]]["position"].astype(int))
                     # Create a sum of the total energy for the variant selected residue save it as a variable
                     total_energy_variant = entries_variant[position_variant]["Total energy[REU]"].sum()
+                    variant_df = entries_variant[position_variant]
+                    variant_df['Residue pair'] = variant_df.apply(lambda x: x['Residue 2'] if x['Residue 1'] == position_variant else x['Residue 1'], axis=1)
+                    # Reset the index
+                    variant_df = variant_df.reset_index(drop=True)
+                    # Convert to int
+                    variant_df['Residue pair'] = variant_df['Residue pair'].astype(int)
+                    # Drop the Residue 1 and Residue 2 columns
+                    variant_df = variant_df.drop(['Residue 1', 'Residue 2'], axis=1)
+                    # Reorder the columns
+                    variant_df = variant_df[['Residue pair', 'Total energy[REU]']]
+
                     st.metric(f"Residue {position_variant} Sum Total Energy [REU]", f"{total_energy_variant:.2f}")
+                    st.dataframe(variant_df.style.background_gradient(axis=0, 
+                                                                                            subset='Total energy[REU]', 
+                                                                                            cmap='coolwarm_r'), 
+                                                                                            use_container_width=True)
+                    # Create a list of the top n energy interactions Residue pairs
+                    # Head returns the top n rows, extract the Residue pair column and convert to a list
+                    top_n_variant = variant_df.head(top_n)["Residue pair"].tolist()
 
-                    st.dataframe(entries_variant[position_wild].style.background_gradient(axis=0, subset='Total energy[REU]', cmap='coolwarm_r'), use_container_width=True)
+                    view_variant = makeobj(variant_structure,molformat='pdb',style='stick',background='white')
+                    view_variant.setStyle({"cartoon": {"style": "oval","color": bb_color,"thickness": cartoon_radius}})
+                    view_variant.addSurface(py3Dmol.VDW, {"opacity": surf_transp},
+                                                        {"hetflag": False})
+                    view_variant.addStyle({"elem": "C", "hetflag": True},
+                                    {"stick": {"color": lig_color, "radius": stick_radius}})
+                    view_variant.addStyle({"hetflag": True},
+                                        {"stick": {"radius": stick_radius}})
+                    # Append the position_variant to the h1_resi_list
+                    hl_resi_list.append(position_variant)
+                    # Add the top n energy interactions to the h1_resi_list
+                    hl_resi_list.append(top_n_variant)
+                    for hl_resi in hl_resi_list:
+                        view_variant.addStyle({"chain": hl_model, "resi": hl_resi, "elem": "C"},
+                                        {"stick": {"color": hl_color, "radius": stick_radius}})
+                        view_variant.addStyle({"chain": hl_model, "resi": hl_resi},
+                                            {"stick": {"radius": stick_radius}})
+
+                        
+                    if label_resi:
+                        for hl_resi in hl_resi_list:
+                            view_variant.addResLabels({"chain": hl_model,"resi": hl_resi},
+                            {"backgroundColor": "lightgray","fontColor": "black","backgroundOpacity": 0.5})
+                    view_variant.zoomTo(
+                        {
+                            'model':0,
+                            'resi': position_variant
+                        }
+                    )
+
+                    add_hover_res(view_variant)
+                    showmol(view_variant,height=height+20, width=width)
+
+
+                
 
 
 
-# if the user is None then ask them to login
-if st.session_state["name"] is None:
-    # Please login
-    st.write("Please go to the homepage to login")
-else:
-    if __name__ == "__main__":
-        STATE = st.session_state['Structure View']
+if __name__ == "__main__":
 
-        initialize_state()
+    # Initialize the session state
+    if 'Structure View' not in st.session_state:
+        st.session_state['Structure View'] = {}
+    # if the pre-requisites are met, run the app
+
+    STATE = st.session_state['Structure View']
+    initialize_state()
+    #If all the pre-requisites are not calculated, then return
+    if not check_files():
+        st.error('Error: Not all Pre-requisites are calculated')
+    else:
         main()

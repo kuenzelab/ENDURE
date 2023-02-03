@@ -15,8 +15,9 @@ from threading import Thread
 from streamlit.runtime.scriptrunner.script_run_context import (
     add_script_run_ctx
 )
-from utility import load_text
+from utility import load_text, add_logo
 
+add_logo("images/draft_logo_200.png")
 
 # Initialization
 # If user or username not in session state then set to None
@@ -258,12 +259,12 @@ def calculate_energy(file_type: str) -> None:
         file.write(pdb_file.read())
     pdb_file.seek(0)
     if STATE['rosetta_local']:
-        this_dir = os.path.dirname(__file__)
+        this_dir = st.session_state['root_dir']
+        this_dir += '/ENDURE'
         root = '/'.join(this_dir.split('/')[:-1])
         executable = f'{root}/{STATE["rosetta_path"]}'
     else:
         executable = st.session_state["Home"]["rosetta_path"]
-    print(executable)
     eb.run(
         file_name=f'lib/storage/{file_type}.pdb',
         save_path=f'lib/storage/energy_{file_type}.out',
@@ -306,7 +307,9 @@ def calculate_relax() -> None:
                 file.write(pdb_file.read())
             pdb_file.seek(0)
     if STATE['rosetta_local']:
-        this_dir = os.path.dirname(__file__)
+        this_dir = st.session_state['root_dir']
+        # Add ENDURE to the path this_dir = st.session_state['root_dir']
+        this_dir += '/ENDURE'
         root = '/'.join(this_dir.split('/')[:-1])
         executable = f'{root}/{STATE["rosetta_path"]}'
     else:
@@ -328,10 +331,7 @@ def calculate_relax() -> None:
         nstruct=1
     )
 
-    print('Relaxation ran')
     STATE['relax'] = True
-
-
 
 
 
@@ -455,27 +455,27 @@ def show_action(
 
 
 actions = {
-    'Cleaning PDB Files': dict(
+    '1) Cleaning PDB Files': dict(
         text_file_name='pdb_files',
         button_label='Clean PDB Files',
         callback=clean_pdb
     ),
-    'Relaxing PDB Files': dict(
+    '2) Relaxing PDB Files': dict(
         text_file_name='pdb_files',
         button_label='Relax PDB Files',
         callback=find_relaxed
     ),
-    'Determining Mutations': dict(
+    '3) Determining Mutations': dict(
         text_file_name='mutations',
         button_label='Find Mutations',
         callback=find_mutations
     ),
-    'Residue Depth': dict(
+    '4) Residue Depth': dict(
         text_file_name='residue_depth',
         button_label='Calculate Depth',
         callback=find_depth
     ),
-    'Rosetta Energy Breakdown Protocol': dict(
+    '5) Rosetta Energy Breakdown': dict(
         text_file_name='energy_files',
         button_label='Calculate Energy',
         callback=find_energy
@@ -584,7 +584,26 @@ def main() -> None:
     """
     global STATE
     STATE = st.session_state['File Upload']
-    
+    # Create a reload function
+    def reload() -> None:
+        """
+        Reloads the page
+        :return:
+        """
+        st.experimental_rerun()
+    # Add a reload button
+    st.sidebar.button(
+        label='Reload',
+        on_click=reload,
+        # add info about the reload button reload the page to check if the calculations are done
+        # by default, the page will not reload
+        help='Reload the page to check if the calculations are done, by default, the page will not reload'
+    )
+    # Add warning about the reload button
+    st.sidebar.warning(
+        # add a arrow up emoji
+        '⬆️⬆️⬆️ \n Reload the page to check if the calculations are done(green), by default, the page will not reload'
+    )
     #left, center, right = st.columns([1, 2, 1])
     # Create a container to hold the file uploaders
     file_uploaders = st.container()
@@ -613,6 +632,111 @@ def second() -> None:
                 with col:
                     show_action(list(actions.keys())[counter],**list(actions.values())[counter])
                     counter += 1
+# Create a third section to hold a general overview after the clean pdb files and Determining mutations is done
+def third() -> None:
+    """
+    Creates the third section of the page, which displays a general overview of the session state mutations
+    :return:
+    """
+    # Print this as a data frame
+    #  st.session_state['File Upload']['mutations']
+    # Create three columns to hold the data
+    df = pd.DataFrame(st.session_state['File Upload']['mutations'])
+    col1, col2, col3= st.columns([1, 1, 1])
+    # Create a dictionary with aminoacid one letter codes as keys and the three letter codes as values and the type of amino acid
+    # as the value
+    amino_acids = {
+        'A': {'three_letter': 'ALA', 'type': 'Aliphatic', 'type_emoji': '🟢'},
+        'R': {'three_letter': 'ARG', 'type': 'Basic', 'type_emoji': '🔴'},
+        'N': {'three_letter': 'ASN', 'type': 'Polar', 'type_emoji': '🟡'},
+        'D': {'three_letter': 'ASP', 'type': 'Acidic', 'type_emoji': '🟤'},
+        'C': {'three_letter': 'CYS', 'type': 'Sulfur', 'type_emoji': '🟣'},
+        'E': {'three_letter': 'GLU', 'type': 'Acidic', 'type_emoji': '🟤'},
+        'Q': {'three_letter': 'GLN', 'type': 'Polar', 'type_emoji': '🟡'},
+        'G': {'three_letter': 'GLY', 'type': 'Aliphatic', 'type_emoji': '🟢'},
+        'H': {'three_letter': 'HIS', 'type': 'Basic', 'type_emoji': '🔴'},
+        'I': {'three_letter': 'ILE', 'type': 'Aliphatic', 'type_emoji': '🟢'},
+        'L': {'three_letter': 'LEU', 'type': 'Aliphatic', 'type_emoji': '🟢'},
+        'K': {'three_letter': 'LYS', 'type': 'Basic', 'type_emoji': '🔴'},
+        'M': {'three_letter': 'MET', 'type': 'Sulfur', 'type_emoji': '🟣'},
+        'F': {'three_letter': 'PHE', 'type': 'Aromatic', 'type_emoji': '🟠'},
+        'P': {'three_letter': 'PRO', 'type': 'Aliphatic', 'type_emoji': '🟢'},
+        'S': {'three_letter': 'SER', 'type': 'Polar', 'type_emoji': '🟡'},
+        'T': {'three_letter': 'THR', 'type': 'Polar', 'type_emoji': '🟡'},
+        'W': {'three_letter': 'TRP', 'type': 'Aromatic', 'type_emoji': '🟠'},
+        'Y': {'three_letter': 'TYR', 'type': 'Aromatic', 'type_emoji': '🟠'},
+        'V': {'three_letter': 'VAL', 'type': 'Aliphatic', 'type_emoji': '🟢'},
+    }
+
+    # In the first column, display the file status
+    with col1:
+        st.header('Overview')
+        # Write in human language a in depth summary of the mutations
+        # Create a list of strings from df that follows the format of the following
+        # index, "Mutated" --> "Wild"
+        list_of_strings = []
+        list_of_strings_indexes = []
+        # Count how many mutations are polar, aliphatic, basic, acidic, aromatic or sulfur in the Mutated column of df
+        # Use a list comprehension to to get how many of the rows in the Mutated column of df are of a certain type
+        # Use the dictionary amino_acids to get the type of amino acid
+        counts_polar = len([row for index, row in df.iterrows() if amino_acids[row['Mutated']]['type'] == 'Polar'])
+        counts_aliphatic = len([row for index, row in df.iterrows() if amino_acids[row['Mutated']]['type'] == 'Aliphatic'])
+        counts_basic = len([row for index, row in df.iterrows() if amino_acids[row['Mutated']]['type'] == 'Basic'])
+        counts_acidic = len([row for index, row in df.iterrows() if amino_acids[row['Mutated']]['type'] == 'Acidic'])
+        counts_aromatic = len([row for index, row in df.iterrows() if amino_acids[row['Mutated']]['type'] == 'Aromatic'])
+        counts_sulfur = len([row for index, row in df.iterrows() if amino_acids[row['Mutated']]['type'] == 'Sulfur'])
+
+
+            
+
+        for index, row in df.iterrows():
+            # Use the three letter code of the amino acid to display the type of mutation
+            # use the dictionary amino_acids to get the three letter code
+            list_of_strings.append(f"{index},{row['Mutated']} ➡️ {row['Wild']}")
+        st.write(f"""
+                        With respect to the wild type PDB file, we found
+                        **{len(st.session_state['File Upload']['mutations'])}** mutations
+                """)
+        st.write(f"""
+                        Of which:
+                        - {counts_polar} are {amino_acids['N']['type_emoji']} 
+                        - {counts_aliphatic} are {amino_acids['G']['type_emoji']}
+                        - {counts_basic} are {amino_acids['R']['type_emoji']}
+                        - {counts_acidic} are {amino_acids['D']['type_emoji']}
+                        - {counts_aromatic} are {amino_acids['F']['type_emoji']}
+                        - {counts_sulfur} are {amino_acids['C']['type_emoji']}
+                    """)
+        
+        
+
+    with col2:
+        st.header('In detail')
+        # Create a expandable section to display the mutations in detail, by default it should be collapsed
+        with st.expander('All mutations'):
+            counter = 0
+            for string in list_of_strings:
+                # use the type emoji to display the type of mutation
+                st.write(f" - Position {df.index[counter]} : {string.split(',')[1]} {amino_acids[string.split(',')[1][0]]['type_emoji']} to {amino_acids[string.split(',')[1][-1]]['type_emoji']}  mutation")
+                counter += 1
+
+    # In the second column, display the mutations
+    with col3:
+        st.header('Legend')
+        # Write a legend for the aminoacid types
+        # Use the st.write function to write the legend
+        st.write("")
+        st.write("")
+        st.write("")
+        st.write("")
+        st.write(f"""
+                        - Polar {amino_acids['N']['type_emoji']}
+                        - Aliphatic {amino_acids['A']['type_emoji']}
+                        - Basic {amino_acids['R']['type_emoji']}        
+                        - Acidic {amino_acids['D']['type_emoji']}
+                        - Aromatic {amino_acids['F']['type_emoji']}
+                        - Sulfur {amino_acids['C']['type_emoji']}
+        """)
+
 
 
 STATUS = {
@@ -640,12 +764,18 @@ STATUS = {
 
 # If name is main, run the main function
 if __name__ == '__main__':
-    # Change the page configuration
-   
-    
-    
-    main()
-    second()
     with st.sidebar:
+        # Create a sidebar with a title
         for key, value in STATUS.items():
             file_status(name=key, **value)
+    # Change the page configuration
+    main()
+    second()
+    # If st.session_state['File Upload']['mutations'] exists, run the third function
+    if 'mutations' not in st.session_state['File Upload']:
+        # Write a message to the user
+        st.warning("Please upload a PDB file to see the mutations and run the clean and calculate mutations functions")
+    else:
+
+        third()
+    

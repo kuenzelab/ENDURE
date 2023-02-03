@@ -1,6 +1,7 @@
 import pandas as pd
 import plotly.express as px
 import plotly.graph_objs as go
+from streamlit_plotly_events import plotly_events
 import streamlit as st
 import streamlit_authenticator as stauth
 # Import yaml
@@ -9,7 +10,7 @@ import yaml
 from yaml import SafeLoader
 from typing import Dict
 from typing import Set
-from streamlit_plotly_events import plotly_events
+
 
 ## If user or username not in session state then set to None
 if "name" not in st.session_state:

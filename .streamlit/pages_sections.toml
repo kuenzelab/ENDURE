@@ -1,0 +1,27 @@
+[[pages]]
+path = "Welcome.py"
+name = "Home"
+icon = "🔬"
+
+
+[[pages]]
+path = "pages/a_File_Upload.py"
+name = "File_Upload"
+icon = "📂"
+
+
+[[pages]]
+path = "pages/b_Interaction_Analysis.py"
+name = "Interaction_Analysis"
+icon = "🔍"
+
+[[pages]]
+path = "pages/c_Residue_Depth_plotly.py"
+name = "Residue Depth"
+icon = "📈"
+
+
+[[pages]]
+path = "pages/d_Energy_Heatmap.py"
+name = "Energy_Heatmap"
+icon = "🔥"

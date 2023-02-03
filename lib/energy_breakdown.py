@@ -5,7 +5,8 @@ from typing import List, Dict, Tuple, Hashable
 from streamlit.elements.progress import ProgressMixin
 sys.path.append(os.path.dirname(__file__))
 from rosetta import rosetta_simple
-
+# Print the path variable
+print(sys.path)
 
 def run(
     file_name: str,

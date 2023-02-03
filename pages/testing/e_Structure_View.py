@@ -1,6 +1,8 @@
 import streamlit as st
 from utility import load_text
 from lib.visualization import WebViewer
+import py3Dmol
+from stmol import makeobj, showmol, render_pdb_resi
 
 STATE: dict
 
@@ -24,6 +26,9 @@ def create_viewer() -> None:
     """
     viewer = WebViewer()
     for i in ['wild', 'variant']:
+        # st write the type of i 
+        st.write(type(i))
+        st.write(i)
         viewer.add_model(i)
         viewer.show_cartoon(i, STATE['cartoon'])
         viewer.show_sc(
@@ -31,7 +36,8 @@ def create_viewer() -> None:
         )
     viewer.set_background(STATE['background'])
     viewer.center('wild', STATE['resi'])
-    viewer.show()
+    #viewer.show()
+    return viewer
 
 
 def color_select() -> None:
@@ -113,5 +119,11 @@ def main():
 if __name__ == '__main__':
     STATE = st.session_state['Structure View']
     # Print st.session_state keys create a list
-    print (list(st.session_state['Structure View']))
+    st.write(list(st.session_state['Structure View']))
+    # print session_state keys
+    st.write(st.session_state['Structure View'].keys())
+    st.write(st.session_state['File Upload'][f'pdb_wild_clean'])
+    # Print the _io.StringIO object to string
+    #st.write(st.session_state['File Upload'][f'pdb_wild_clean'].getvalue())
+
     main()
