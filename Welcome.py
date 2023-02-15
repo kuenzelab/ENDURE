@@ -30,6 +30,7 @@ st.set_page_config(
     page_title="Hello",
     page_icon="👋",
     layout="wide",
+    initial_sidebar_state="expanded",
 )
 
 STATE: dict
@@ -265,22 +266,30 @@ st.write("# Welcome to ENDURE! 💻🔬")
 
 st.markdown(
 """
-**ENDURE is a user-friendly web application designed to help you analyze the energetic contributions of single and multi-variant protein designs. With ENDURE, you can quickly and easily evaluate the structural and thermodynamic changes that occur when mutations are introduced into your protein designs.**
+**ENDURE is a user-friendly web application designed to help you analyze the energetic contributions of single and multi-variant protein designs. 
+With ENDURE, you can quickly and easily evaluate the structural and thermodynamic changes that occur when mutations are introduced into your protein designs.**
 
 ## File Upload 📂
 
-The first step in using ENDURE is to upload your protein models in PDB format. On the file upload page, simply select the PDB files you want to analyze and hit the "Upload" button. ENDURE will take care of the rest, running the necessary preprocessing steps to prepare your files for analysis.
+The first step in using ENDURE is to upload your protein models in PDB format. On the file upload page, simply select the PDB files you want to analyze and 
+hit the "Upload" button. ENDURE will take care of the rest, running the necessary preprocessing steps to prepare your files for analysis.
 
 ## Interaction Analysis 🔍
 
-Once your files have been uploaded, you can dive into the interaction analysis page to get a detailed look at the changes in pairwise interactions that occur when mutations are introduced. ENDURE uses the Rosetta energy breakdown protocol to compare the output of the wild-type and variant designs, giving you a clear picture of how the interactions have changed.
+This section provides an overview of the interactions between the residues in the uploaded protein structure. The user can select different types of interactions, 
+such as salt bridges, sulfide bonds, and hydrogen bonds, and view their changes between a variant and wild-type structure.
+
 ## Residue Depth 📈
 
-The residue depth page provides a visual representation of the change in residue depth that occurs when mutations are introduced. Residue depth is calculated using the Biopython library and is defined as the average distance (in angstroms) of the atoms in a residue from the solvent accessible surface. By analyzing the changes in residue depth, you can gain insights into how mutations affect the structural stability of your designs.
+The residue depth page provides a visual representation of the change in residue depth that occurs when mutations are introduced. Residue depth is calculated 
+using the Biopython library and is defined as the average distance (in angstroms) of the atoms in a residue from the solvent accessible surface. By analyzing 
+the changes in residue depth, you can gain insights into how mutations affect the structural stability of your designs.
 
 ## Energy Heatmap 🔥
 
-The energy heatmap page provides a visual representation of the changes in interaction energy that occur when mutations are introduced. The heatmap allows you to easily identify which residues are contributing the most to the changes in interaction energy, providing valuable insights into how to optimize your designs for stability and functionality.
+The energy heatmap page provides a visual representation of the changes in interaction energy that occur when mutations are introduced. 
+The heatmap allows you to easily identify which residues are contributing the most to the changes in interaction energy, providing valuable 
+insights into how to optimize your designs for stability and functionality.
 
 ## Example user workflow
 

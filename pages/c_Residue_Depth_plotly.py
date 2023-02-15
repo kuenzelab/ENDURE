@@ -476,6 +476,8 @@ def build_depth_variant_figure(df: pd.DataFrame,
     fig.update_yaxes(title_text="Net Interaction Energy [REU]")
     # Make the figure longer
     fig.update_layout(height=height, width=width)
+    fig.update_layout(clickmode='select+event', dragmode='lasso', hoverdistance=10)
+
     return fig
 
 
@@ -512,6 +514,7 @@ def build_depth_wild_figure(df: pd.DataFrame,
     fig.update_yaxes(title_text="Net Interaction Energy [REU]")
     # Make the figure longer
     fig.update_layout(height=height, width=width)
+    fig.update_layout(clickmode='select+event', dragmode='lasso', hoverdistance=10)
     return fig
 
 

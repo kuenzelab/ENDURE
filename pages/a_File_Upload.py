@@ -16,15 +16,8 @@ from streamlit.runtime.scriptrunner.script_run_context import (
     add_script_run_ctx
 )
 from utility import load_text, add_logo
-
 add_logo("images/draft_logo_200.png")
 
-# Initialization
-# If user or username not in session state then set to None
-if "name" not in st.session_state:
-    st.session_state["name"] = None
-if "username" not in st.session_state:
-    st.session_state["username"] = None
 
 STATE: dict
 
