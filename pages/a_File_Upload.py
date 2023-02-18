@@ -12,6 +12,7 @@ from Bio.PDB.PDBParser import PDBParser
 from Bio.PDB.ResidueDepth import ResidueDepth
 from functools import partial
 from threading import Thread
+import requests
 from streamlit.runtime.scriptrunner.script_run_context import (
     add_script_run_ctx
 )
@@ -41,6 +42,13 @@ LOCAL_PATH = 'lib/rosetta_linux/source/bin/residue_energy_breakdown' \
              '.static.linuxgccrelease'
 RS_LOCAL_PATH = 'lib/rosetta_linux/source/bin/rosetta_scripts' \
                 '.static.linuxgccrelease'
+                
+
+# If esmfold_prediction_wild is not initialized 
+if 'esmfold_prediction_wild' not in st.session_state:
+    st.session_state['esmfold_prediction_wild'] = ""
+if 'esmfold_prediction_mutant' not in st.session_state:
+    st.session_state['esmfold_prediction_mutant'] = ""
 
 def new_files() -> None:
     """
@@ -490,6 +498,103 @@ def use_example(file_name: str) -> None:
     file.name = f'example_{file_name[4:]}.pdb'
     STATE[file_name] = file
 
+#TODO
+## [ ] A function that requests the prediction from the ESMFold API and stores it a session state
+## [ ] A function that renders a sequence input.text widget for ESMFOLD api prediction of sequence 
+##     as input that when changed triggers the API request function 
+
+def esmfold_api_request_wild():
+    """
+    A function that makes a POST request to the ESMFold API to predict the
+    folding of a given wild type protein sequence. The predicted protein structure
+    is then saved to the session state and can be downloaded by the user.
+
+    Returns:
+        tuple: A tuple containing a message string and the predicted protein
+        structure. The message string indicates whether the prediction was
+        successful or not. The structure is a BytesIO object containing the
+        predicted protein structure in PDB format.
+
+    Example usage:
+        message, structure = esmfold_api_request_mutant()
+        if message == "Prediction for mutant is now complete and ready for download":
+            st.download_button(
+                label="Download predicted structure",
+                data=structure.getvalue(),
+                file_name=structure.name,
+                mime="chemical/x-pdb",
+            )
+        else:
+            st.write(message)
+    """
+    api_url = "https://api.esmatlas.com/foldSequence/v1/pdb/"
+    print("callback")
+    seq_name = "pdb_wild"
+
+    if st.session_state.esmfold_prediction_wild is not None:
+        prediction = requests.post(api_url, data=st.session_state.esmfold_prediction_wild)
+        if prediction.status_code == 200:
+            structure = prediction.content
+            # Save the structure to the session state
+            file = BytesIO()
+            file.write(structure)
+            file.seek(0)
+            file.name =  f'esm_{seq_name[4:]}.pdb'
+            STATE[seq_name] = file
+
+            message = "Prediction for is now complete and ready for download"
+            print(message)
+        else:
+            message = "Sorry try again - the ESMFold API might be having problems"
+            structure = None
+            print(message)
+        return message, structure
+
+def esmfold_api_request_mutant():
+    """
+    A function that makes a POST request to the ESMFold API to predict the
+    folding of a given mutant protein sequence. The predicted protein structure
+    is then saved to the session state and can be downloaded by the user.
+
+    Returns:
+        tuple: A tuple containing a message string and the predicted protein
+        structure. The message string indicates whether the prediction was
+        successful or not. The structure is a BytesIO object containing the
+        predicted protein structure in PDB format.
+
+    Example usage:
+        message, structure = esmfold_api_request_mutant()
+        if message == "Prediction for mutant is now complete and ready for download":
+            st.download_button(
+                label="Download predicted structure",
+                data=structure.getvalue(),
+                file_name=structure.name,
+                mime="chemical/x-pdb",
+            )
+        else:
+            st.write(message)
+    """
+    api_url = "https://api.esmatlas.com/foldSequence/v1/pdb/"
+    print("callback")
+    seq_name = "pdb_variant"
+    if st.session_state.esmfold_prediction_mutant is not None:
+        prediction = requests.post(api_url, data=st.session_state.esmfold_prediction_mutant)
+        if prediction.status_code == 200:
+            structure = prediction.content
+            # Save the structure to the session state
+            file = BytesIO()
+            file.write(structure)
+            file.seek(0)
+            file.name =  f'esm_{seq_name[4:]}.pdb'
+            STATE[seq_name] = file
+
+            message = "Prediction for is now complete and ready for download"
+            print(message)
+        else:
+            message = "Sorry try again - the ESMFold API might be having problems"
+            structure = None
+            print(message)
+        return message, structure
 
 def file_uploader_widgets() -> None:
     """
@@ -512,6 +617,14 @@ def file_uploader_widgets() -> None:
                         on_click=partial(use_example, file_name=key)
                     )
                     KEY += 1
+                    st.text_input(
+                        value="",
+                        max_chars=300,
+                        label='Paste wildtype sequence for ESMFold Prediction',
+                        key='esmfold_prediction_wild',
+                        on_change=esmfold_api_request_wild
+                    )
+                    KEY += 1
                 else:
                     st.success(
                         f'{key} is uploaded --- {STATE[key].name}'
@@ -527,9 +640,18 @@ def file_uploader_widgets() -> None:
                 if key not in STATE.keys() or STATE[key] is None:
                     file_uploader(key, value)
                     st.button(
+                        
                         label='Use Example File',
                         key=KEY,
                         on_click=partial(use_example, file_name=key)
+                    )
+                    KEY += 1
+                    st.text_input(
+                        value="",
+                        max_chars=300,
+                        label='Paste mutant sequence for ESMFold Prediction',
+                        key='esmfold_prediction_mutant',
+                        on_change=esmfold_api_request_mutant
                     )
                     KEY += 1
                 else:
@@ -603,7 +725,7 @@ def main() -> None:
     check_local_rosetta()
     with file_uploaders:
 
-        st.header('Upload PDB Files')
+        st.header('Upload PDB Files or paste your sequences')
 
         file_uploader_widgets()
         st.header('Run pre-processing actions')
