@@ -685,7 +685,7 @@ def third() -> None:
         for index, row in df.iterrows():
             # Use the three letter code of the amino acid to display the type of mutation
             # use the dictionary amino_acids to get the three letter code
-            list_of_strings.append(f"{index},{row['Mutated']} ➡️ {row['Wild']}")
+            list_of_strings.append(f"{index},{row['Wild']} ➡️ {row['Mutated']}")
         st.write(f"""
                         With respect to the wild type PDB file, we found
                         **{len(st.session_state['File Upload']['mutations'])}** mutations
@@ -705,11 +705,11 @@ def third() -> None:
     with col2:
         st.header('In detail')
         # Create a expandable section to display the mutations in detail, by default it should be collapsed
-        with st.expander('All mutations'):
+        with st.expander('All mutations', expanded=True):
             counter = 0
             for string in list_of_strings:
                 # use the type emoji to display the type of mutation
-                st.write(f" - Position {df.index[counter]} : {string.split(',')[1]} {amino_acids[string.split(',')[1][0]]['type_emoji']} to {amino_acids[string.split(',')[1][-1]]['type_emoji']}  mutation")
+                st.write(f" - Position {df.index[counter]} : {string.split(',')[1]}  mutation")
                 counter += 1
 
     # In the second column, display the mutations

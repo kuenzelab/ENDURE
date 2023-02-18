@@ -124,6 +124,16 @@ def energy_calc(
         mutations.index.tolist()
     )
     bar.progress(85)
+    # This code calculates the number of residues, 
+    # the total charge, the number of positively charged residues, 
+    # the number of negatively charged residues, 
+    # the number of salt bridges, the number of sulfide bonds, 
+    # the number of hydrogen bonds between side chains, 
+    # the number of hydrogen bonds between backbone and side chains, 
+    # the number of hydrogen bonds between backbone and backbone in short range, 
+    # and the number of hydrogen bonds between backbone and backbone in long range 
+    # for each protein in a given PPI.
+
     data = [
         {x.upper(): len(y) for x, y in results.items()},
         {x.upper(): round(y['total'].sum(), 4) for x, y in results.items()},

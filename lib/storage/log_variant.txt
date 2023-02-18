@@ -1,12 +1,12 @@
 core.init: Checking for fconfig files in pwd and ./rosetta/flags
 core.init: Rosetta version: rosetta.binary.linux.release-280 r280 2021.16+release.8ee4f02 8ee4f02ac5768a8a339ffada74cb0ff5f778b3e6 https://www.rosettacommons.org 2021-04-20T20:52:25.363712
 core.init: command: /home/iwe30/Github/ENDURE/lib/rosetta_linux/source/bin/residue_energy_breakdown.static.linuxgccrelease -in:file:s lib/storage/variant.pdb -out:file:silent lib/storage/energy_variant.out
-basic.random.init_random_generator: 'RNG device' seed mode, using '/dev/urandom', seed=-146885021 seed_offset=0 real_seed=-146885021
-basic.random.init_random_generator: RandomGenerator:init: Normal mode, seed=-146885021 RG_type=mt19937
+basic.random.init_random_generator: 'RNG device' seed mode, using '/dev/urandom', seed=1543431536 seed_offset=0 real_seed=1543431536
+basic.random.init_random_generator: RandomGenerator:init: Normal mode, seed=1543431536 RG_type=mt19937
 core.init: Resolved executable path: /home/iwe30/Github/ENDURE/lib/rosetta_linux/source/bin/residue_energy_breakdown.static.linuxgccrelease
 core.init: Looking for database based on location of executable: /home/iwe30/Github/ENDURE/lib/rosetta_linux/database/
 core.chemical.GlobalResidueTypeSet: Finished initializing fa_standard residue type set.  Created 984 residue types
-core.chemical.GlobalResidueTypeSet: Total time to initialize 0.45 seconds.
+core.chemical.GlobalResidueTypeSet: Total time to initialize 0.46 seconds.
 core.scoring.ScoreFunctionFactory: SCOREFUNCTION: ref2015
 core.scoring.etable: Starting energy table calculation
 core.scoring.etable: smooth_etable: changing atr/rep split to bottom of energy well
@@ -29,18 +29,30 @@ basic.io.database: Database file opened: scoring/score_functions/P_AA_pp/P_AA_n
 core.scoring.P_AA: shapovalov_lib::shap_p_aa_pp_smooth_level of 1( aka low_smooth ) got activated.
 basic.io.database: Database file opened: scoring/score_functions/P_AA_pp/shapovalov/10deg/kappa131/a20.prop
 core.import_pose.import_pose: File 'lib/storage/variant.pdb' automatically determined to be of type PDB
-core.conformation.Conformation: Found disulfide between residues 241 256
-core.conformation.Conformation: current variant for 241 CYS
+core.conformation.Conformation: Found disulfide between residues 170 206
+core.conformation.Conformation: current variant for 170 CYS
+core.conformation.Conformation: current variant for 206 CYS
+core.conformation.Conformation: current variant for 170 CYD
+core.conformation.Conformation: current variant for 206 CYD
+core.conformation.Conformation: Found disulfide between residues 240 256
+core.conformation.Conformation: current variant for 240 CYS
 core.conformation.Conformation: current variant for 256 CYS
-core.conformation.Conformation: current variant for 241 CYD
+core.conformation.Conformation: current variant for 240 CYD
 core.conformation.Conformation: current variant for 256 CYD
-core.conformation.Conformation: Found disulfide between residues 241 256
-core.conformation.Conformation: current variant for 241 CYD
+core.conformation.Conformation: Found disulfide between residues 170 206
+core.conformation.Conformation: current variant for 170 CYD
+core.conformation.Conformation: current variant for 206 CYD
+core.conformation.Conformation: current variant for 170 CYD
+core.conformation.Conformation: current variant for 206 CYD
+core.conformation.Conformation: Found disulfide between residues 240 256
+core.conformation.Conformation: current variant for 240 CYD
 core.conformation.Conformation: current variant for 256 CYD
-core.conformation.Conformation: current variant for 241 CYD
+core.conformation.Conformation: current variant for 240 CYD
 core.conformation.Conformation: current variant for 256 CYD
 basic.io.database: Database file opened: scoring/score_functions/elec_cp_reps.dat
 core.scoring.elec.util: Read 40 countpair representative atoms
 core.pack.dunbrack.RotamerLibrary: shapovalov_lib_fixes_enable option is true.
 core.pack.dunbrack.RotamerLibrary: shapovalov_lib::shap_dun10_smooth_level of 1( aka lowest_smooth ) got activated.
 core.pack.dunbrack.RotamerLibrary: Binary rotamer library selected: /home/iwe30/Github/ENDURE/lib/rosetta_linux/database/rotamer/shapovalov/StpDwn_0-0-0/Dunbrack10.lib.bin
+core.pack.dunbrack.RotamerLibrary: Using Dunbrack library binary file '/home/iwe30/Github/ENDURE/lib/rosetta_linux/database/rotamer/shapovalov/StpDwn_0-0-0/Dunbrack10.lib.bin'.
+core.pack.dunbrack.RotamerLibrary: Dunbrack 2010 library took 0.1 seconds to load from binary

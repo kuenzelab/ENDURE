@@ -352,11 +352,23 @@ def create_data(file_name: str) -> pd.DataFrame:
         source = create_source_wild(depth, net, mut_map)
         # Convert the dictionary to a dataframe
         source_df = pd.DataFrame(source)
+        # Round the column x and y to two decimals
+        source_df["x"] = source_df["x"].round(2)
+        source_df["y"] = source_df["y"].round(2)
+        # Remove the elements that are Conserved in the column label
+        source_df = source_df[source_df["label"] != "Conserved"]
 
     else:
         source = create_source_variant(depth, net, mut_map)
         # Convert the dictionary to a dataframe
         source_df = pd.DataFrame(source)
+        # Round the column x and y to two decimals
+        source_df["x"] = source_df["x"].round(2)
+        source_df["y"] = source_df["y"].round(2)
+        # Remove the elements that are Conserved or Worse Energy in the column label
+        source_df = source_df[source_df["label"] != "Conserved"]
+        # Create a new df where the rows where label is Worse Energy are removed
+        #df = df[df["label"] != "Worse Energy"]
 
     return source_df, entries_list
 
@@ -678,14 +690,15 @@ def main():
 
     cartoon_radius = 0.2
     stick_radius = 0.2
+    # Run the create_data function to create the data
+    df_wild, entries_wild = create_data("wild")
+    df_variant, entries_variant = create_data("variant")
 
 
-    df_variant = load_data_variant()
     # Create a list with the positions that have Worse Energy
     worse_energy_list = df_variant[df_variant.label == "Worse Energy"].position.to_list()
     
     
-    df_wild = load_data_wild()
     # Drop the rows that have Worse Energy in the df_wild
     df_wild = df_wild[~df_wild.position.isin(worse_energy_list)]
     # Drop the rows that have Worse Energy in the df_variant
@@ -693,9 +706,8 @@ def main():
 
     transformed_df_wild, transformed_df_variant = query_data(df_wild,df_variant)
     st.button("Reset filters", on_click=reset_state_callback)
-    # Run the create_data function to create the data
-    source_wild, entries_wild = create_data("wild")
-    source_variant, entries_variant = create_data("variant")
+
+
     st.title("Energy Breakdown by Residue Depth")
 
     #render_preview_ui(transformed_df_wild, transformed_df_variant)

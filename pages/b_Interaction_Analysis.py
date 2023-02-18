@@ -285,8 +285,11 @@ def display_changes(label: str,
 
 
 def total_energy_changes(all_changes) -> float:
-    print('here')
+    """
+    Calculate the total energy changes
+    """
     sum = 0
+    # Create a list of categories
     interactionList = [
                 'a',
                 'b',
@@ -295,14 +298,25 @@ def total_energy_changes(all_changes) -> float:
                 'e',
                 'f'
             ]
+    # Loop through interactions
     for interaction in interactionList:
             # Add the sum to sum
         sum += all_changes[f'{interaction}']['total'].sum()
     return sum
 
 def significant_changes(all_changes) -> float:
-    print('here')
+    """
+    Calculate the total significant changes
+    Here we define significant as a change of 1 REU or more
+    :param all_changes: dict
+    :
+    :
+    return: float
+    """
+
+    # Initialize sum
     sum = 0
+    # Get list of interactions
     interactionList = [
                 'a',
                 'b',
@@ -311,9 +325,11 @@ def significant_changes(all_changes) -> float:
                 'e',
                 'f'
             ]
+    # Loop through each interaction
     for interaction in interactionList:
             # Add the sum to sum
         sum += all_changes[f'{interaction}'][(all_changes[f'{interaction}']['total'] >= 1) | (all_changes[f'{interaction}']['total'] <= -1 )]['total'].sum()
+    # Return sum
     return sum
 
 
