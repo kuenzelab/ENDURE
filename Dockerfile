@@ -1,3 +1,4 @@
+
 # From python:3.9.16-bullseye
 FROM python:3.9.16-bullseye
 
@@ -27,6 +28,19 @@ RUN tar -xvf /app/ENDURE/lib/rosetta.tar.gz -C /app/ENDURE/lib/
 
 # Remove rosetta.tar.gz
 RUN rm /app/ENDURE/lib/rosetta.tar.gz
+
+# Copy requirements.txt from local to /app/ENDURE overwriting the existing one
+COPY requirements.txt /app/ENDURE/requirements.txt
+
+# Install dependencies
+RUN pip install -r requirements.txt  --ignore-installed
+
+# Copy the Welcome.py from local to /app/ENDURE/overwriting the existing one
+COPY Welcome.py /app/ENDURE/Welcome.py
+
+# Copy the pages\d_Energy_Heatmap.py from local to /app/ENDURE/pages/overwriting the existing one
+COPY pages/d_Energy_Heatmap.py /app/ENDURE/pages/d_Energy_Heatmap.py
+
 
 # Set working directory to /app/ENDURE
 WORKDIR /app/ENDURE

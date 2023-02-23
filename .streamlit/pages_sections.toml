@@ -12,7 +12,7 @@ icon = "📂"
 
 [[pages]]
 path = "pages/b_Interaction_Analysis.py"
-name = "Interaction_Analysis"
+name = "Pairwise interactions"
 icon = "🔍"
 
 [[pages]]
@@ -23,5 +23,5 @@ icon = "📈"
 
 [[pages]]
 path = "pages/d_Energy_Heatmap.py"
-name = "Energy_Heatmap"
+name = "Energy difference heatmap"
 icon = "🔥"
