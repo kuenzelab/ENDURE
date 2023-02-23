@@ -1,4 +1,3 @@
-from pages.testing import c_Residue_Depth, e_Structure_View
 import streamlit as st
 # Import yaml
 import yaml
@@ -24,7 +23,7 @@ if 'root_dir' not in st.session_state.keys():# Save to the Session State the roo
     print(__file__)
     print(st.session_state['root_dir'])
     # Add '/home/iwe30/Github/' to the session state
-    st.session_state['root_dir'] = '/home/iwe30/Github/ENDURE'
+    st.session_state['root_dir'] = '/app/ENDURE'
     
 st.set_page_config(
     page_title="Hello",
@@ -310,51 +309,7 @@ It is recommended for new users to follow this pipeline in order to effectively 
     4. View the Residue Depth and Energy Heatmap pages for additional insights into the protein model.
 """
 )
-import matplotlib.pyplot as plt
-import matplotlib.patches as mpatches
-import matplotlib.colors as colors
-import networkx as nx
 
-# Create a directed graph object
-G = nx.DiGraph()
-
-# Add nodes to the graph
-G.add_node("File Upload")
-G.add_node("Interaction Analysis")
-G.add_node("Residue Depth")
-G.add_node("Energy Heatmap")
-
-# Add edges between the nodes
-G.add_edge("File Upload", "Interaction Analysis")
-G.add_edge("Interaction Analysis", "Residue Depth")
-G.add_edge("Residue Depth", "Energy Heatmap")
-
-# Create a figure with a specific size
-plt.figure(figsize=(10, 7))
-
-# Define custom colors for the nodes and edges
-node_color = '#3366ff'
-edge_color = '#00cc66'
-
-# Draw the graph with custom node colors, edge colors, and labels
-fig = nx.draw(G, with_labels=True, node_color=node_color, node_size=500, edge_color=edge_color, edge_cmap=plt.cm.Blues, font_size=20, font_weight='bold')
-
-# Add a patch for the node colors to the legend
-node_patch = mpatches.Patch(color=node_color, label='Nodes')
-
-# Add a patch for the edge colors to the legend
-edge_patch = mpatches.Patch(color=edge_color, label='Edges')
-
-# Add the patches to the legend
-plt.legend(handles=[node_patch, edge_patch], loc='upper right')
-
-# Show the plot
-plt.show()
-# Display the plot using streamlit in the middle column
-c1, c2, c3 = st.columns([1, 1, 1])
-with c2:
-
-    st.pyplot(fig)
 # Add a streamlit logo to the sidebar
 st.markdown("""
 ## Foreword 📖

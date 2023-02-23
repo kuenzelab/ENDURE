@@ -3,15 +3,7 @@ import pandas as pd
 import numpy as np
 import colorcet as cc
 from typing import Dict
-from bokeh.plotting import figure, ColumnDataSource
-from bokeh.models import LinearColorMapper, ColorBar, DataTable, TableColumn
-from bokeh.transform import transform
-from bokeh.models.tools import (
-    WheelZoomTool, ResetTool, PanTool, TapTool, BoxSelectTool, SaveTool
-)
-from bokeh.models.callbacks import CustomJS
-from bokeh.layouts import gridplot, column
-from bokeh.models.widgets import Slider, Button
+
 from lib.visualization import WebViewer
 import json
 from typing import List
