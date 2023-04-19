@@ -16,7 +16,7 @@ authenticator = stauth.Authenticate(
     config['cookie']['expiry_days'],
     config['preauthorized']
     )
-st.title("Settings")
+st.title("Soon")
 # If user or username not in session state then set to None
 if "name" not in st.session_state:
     st.session_state["name"] = None

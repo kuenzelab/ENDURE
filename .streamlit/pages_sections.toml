@@ -25,3 +25,8 @@ icon = "📈"
 path = "pages/d_Energy_Heatmap.py"
 name = "Energy difference heatmap"
 icon = "🔥"
+
+[[pages]]
+path = "pages/w Settings.py"
+name = "ProtMPNN + AFRank iterative design"
+icon = "🔜"
