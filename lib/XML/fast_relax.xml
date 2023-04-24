@@ -9,8 +9,6 @@
 
     <MOVERS>
     <FastRelax name="relax" scorefxn="REF2015" task_operations="ifcl" repeats="1"/>
-    production should be 5 repeats
-    FastRelax name="relax" scorefxn="REF2015" task_operations="ifcl" repeats="5"
     </MOVERS>
 
     <FILTERS>

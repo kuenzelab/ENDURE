@@ -7,7 +7,7 @@ from linux_handles import rosetta_simple
 
 def run(filename: str, nstruct: int) -> None:
     print(f'Started Job for {filename} with nstruct: {nstruct}')
-    executable = 'rosetta_scripts.default.linuxgccrelease'
+    executable = 'rosetta_scripts.static.linuxgccrelease'
 
     options = [
         f'-s data/inputs/{filename}.pdb',

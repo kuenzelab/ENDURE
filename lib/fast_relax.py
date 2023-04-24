@@ -13,7 +13,8 @@ def run(
     save_pdb_path: str,
     log_path: str,
     executable: str,
-    nstruct: int
+    nstruct: int,
+    tag: str
 ) -> None:
     """
     Run the Rosetta Fast Relax Protocol in a Subprocess
@@ -30,7 +31,6 @@ def run(
     :return: None
     """
     print(f'Started Job for {file_name} with nstruct: {nstruct}')
-    executable = 'rosetta_scripts.static.linuxgccrelease'
 
     options = [
         f'-s {file_name}',
@@ -39,11 +39,15 @@ def run(
         f'-out:pdb',
         f'-out:path:pdb {save_pdb_path}',
         f'-nstruct {nstruct}',
-        f'-out:file:scorefile {save_score_path}'
+        f'-out:file:scorefile {save_score_path}',
+        f'-out:no_nstruct_label',
+        f'-out:user_tag {tag}',
+        '-overwrite'
     ]
     # Add the options Unconstrained and Constrained
     #options.append('-relax:constrain_relax_to_start_coords')
-
+    print(save_score_path)
+    print(tag)
     log = rosetta_simple(executable, options)
     with open(log_path, 'w') as file:
         file.write(log)

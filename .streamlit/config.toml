@@ -8,3 +8,6 @@ secondaryBackgroundColor="#F7EFE5"
 textColor="#262730"
 # Define a modern font 
 font="sans serif"
+
+[client]
+showErrorDetails = false

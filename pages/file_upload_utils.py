@@ -173,6 +173,7 @@ def calculate_energy(file_type: str) -> None:
         executable = f"{root}/{STATE['rosetta_path']}"
     else:
         executable = st.session_state['Home']['rosetta_path']
+    print(executable)
     eb_run(file_name=f"lib/storage/{file_type}.pdb", save_path=f"lib/storage/energy_{file_type}.out",
            log_path=f"lib/storage/log_{file_type}.txt", executable=executable)
     eb_convert_outfile(file_name=f"lib/storage/energy_{file_type}.out", save_path=f"lib/storage/energy_{file_type}.csv")
@@ -185,8 +186,9 @@ def calculate_energy(file_type: str) -> None:
     os.remove(f"lib/storage/energy_{file_type}.out")
 
 
-def calculate_relax() -> None:
+def calculate_relax(file_type: str) -> None:
     check_local_rosetta()
+    print("calculate relax")
     for i in ['wild', 'variant']:
         if f"pdb_{i}_clean" in STATE.keys():
             pdb_file: StringIO = STATE[f"pdb_{i}_clean"]
@@ -197,15 +199,19 @@ def calculate_relax() -> None:
         this_dir = st.session_state['root_dir']
         this_dir += '/ENDURE'
         root = '/'.join(this_dir.split('/')[:-1])
-        executable = f"{root}/{STATE['rosetta_path']}"
+        executable = f"{root}/{STATE['rosetta_scripts_path']}"
     else:
-        executable = st.session_state['Home']['rosetta_path']
-    fr_run(file_name='lib/storage/wild.pdb', save_score_path='lib/storage/score_wild_relaxed.out',
-           save_pdb_path='lib/storage/pdb_wild_relaxed.pdb', log_path='lib/storage/log_wild_relaxed.txt',
-           executable=executable, nstruct=1)
-    fr_run(file_name='lib/storage/variant.pdb', save_score_path='lib/storage/score_variant.out',
-           save_pdb_path='lib/storage/pdb_variant.pdb', log_path='lib/storage/log_variant.txt',
-           executable=executable, nstruct=1)
+        executable = st.session_state['Home']['rosetta_scripts_path']
+    print(executable)
+    print(file_type)
+    fr_run(file_name=f'lib/storage/{file_type}.pdb', 
+           save_score_path=f'lib/storage/score_{file_type}_relaxed.out',
+           save_pdb_path=f'lib/storage', 
+           log_path=f'lib/storage/log_{file_type}_relaxed.txt',
+           executable=executable, 
+           nstruct=1,
+           tag=f'pdb_{file_type}_relaxed.pdb'
+           )
     STATE['relax'] = True
 
 
@@ -579,9 +585,10 @@ def find_relaxed(container) -> None:
     this thread using add_script_run_ctx for the wild-type and variant
     :return:
     """
+    print("test")
     for i in ['wild', 'variant']:
-        if f'pdb_{i}_relaxed' in STATE.keys():
-            task = Thread(target=partial(calculate_relax))
+        if f'pdb_{i}_clean' in STATE.keys():
+            task = Thread(target=partial(calculate_relax,i))
             add_script_run_ctx(task)
             task.start()
             container.warning(

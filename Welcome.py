@@ -10,6 +10,9 @@ import yaml
 from st_pages import show_pages_from_config
 from utility import add_logo, load_text
 
+import warnings
+warnings.filterwarnings("ignore")
+
 # Constants
 LOCAL_PATH = 'lib/rosetta_linux/source/bin/residue_energy_breakdown.static.linuxgccrelease'
 RS_LOCAL_PATH = 'lib/rosetta_linux/source/bin/rosetta_scripts.static.linuxgccrelease'
@@ -51,17 +54,22 @@ def check_local_rosetta() -> None:
     :return:
     """
     exists = os.path.exists(LOCAL_PATH)
+    rs_exists = os.path.exists(RS_LOCAL_PATH)
     if STATE:
         if 'rosetta_installed' not in STATE.keys():
             STATE['rosetta_installed'] = False
             STATE['rosetta_local'] = False
             st.session_state['Home']['rosetta_installed'] = False
             st.session_state['Home']['rosetta_local'] = False
+            
         STATE['rosetta_local'] = exists
+        
         if exists:
             STATE['rosetta_path'] = LOCAL_PATH
+            STATE['rosetta_scripts_path'] = RS_LOCAL_PATH
             STATE['rosetta_installed'] = True
             st.session_state['rosetta_path'] = LOCAL_PATH
+            st.session_state['rosetta_scripts_path'] = RS_LOCAL_PATH
             st.session_state['Home']['rosetta_installed'] = True
     else:
         if 'rosetta_installed' not in st.session_state.keys():
@@ -71,7 +79,9 @@ def check_local_rosetta() -> None:
         if exists:
             st.session_state['rosetta_path'] = LOCAL_PATH
             st.session_state['rosetta_installed'] = True
-
+        if rs_exists:
+            st.session_state['rosetta_scripts_path'] = RS_LOCAL_PATH
+            st.session_state['rosetta_installed'] = True
 
 def check_user_rosetta(path: str) -> bool:
     """
